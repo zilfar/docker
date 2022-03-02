@@ -1,0 +1,30 @@
+version: "3"
+services:
+      mongo:
+            container_name: mongo
+            image: mongo
+            volumes:
+              - ./data:/data/db
+            ports:
+              - '27018:27017'
+            healthcheck:
+              test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/posts --quiet
+              interval: 5s
+              timeout: 5s
+              retries: 8
+      app:
+            container_name: app
+            image: zfarik/nodeapp
+            restart: always
+            # build: .
+            ports:
+              - "80:3000"
+            links:
+              - mongo
+            depends_on:
+                mongo:
+                  condition: service_healthy
+              
+            stdin_open: true # docker run -i
+            tty: true        # docker run -t
+
